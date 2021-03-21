@@ -5,19 +5,24 @@ export default class Slide{
     this.distancia= {
       finalPositiom: 0,
       startX: 0,
-      movement:0
+      actualPosition:0,
+      moved:0
     }
   }
+  transition(boolean){
+    this.slide.style.transition = boolean ? 'transform .3s' : ''
+  }
   moveSlide(distanceX){
-    this.distancia.movement = distanceX
+    this.distancia.actualPosition = distanceX
     this.slide.style.transform = `translate3d(${distanceX}px, 0px, 0px)`
   }
   updatePosition(clientX){
-    this.distancia.movement = (clientX - this.distancia.startX )* 1.7 
-    return this.distancia.movement + this.distancia.finalPositiom
+    this.distancia.moved = (clientX - this.distancia.startX )* 1.7 
+    return this.distancia.moved + this.distancia.finalPositiom
   }
   onStart(event){
     let moveType 
+    this.transition(false)
     if(event.type == "mousedown"){
       event.preventDefault()
       this.distancia.startX = event.clientX // adiciona ao objeto a posição no eixo X no momento do click
@@ -27,21 +32,33 @@ export default class Slide{
       moveType = 'touchmove'
     }
     this.wrapper.addEventListener(moveType, this.onMove)
+   
   }
 
   onMove(event){
     const pointerType = (event.type === "mousemove") ? event.clientX : event.changedTouches[0].clientX
     const finalPositiom = this.updatePosition(pointerType)
     this.moveSlide(finalPositiom)
+    
   }
 
   onEnd(event){
     const  moveType = (event.type == "mouseup") ? 'mousemove' : 'touchmove'
     this.wrapper.removeEventListener(moveType, this.onMove)
-    this.distancia.finalPositiom = this.distancia.movement
-    
-
+    this.distancia.finalPositiom = this.distancia.actualPosition
+    this.transition(true)
+    this.changeSlideOnEnd()
   }
+
+  
+  changeSlideOnEnd(){
+    
+   if(this.distancia.moved <150) this.activeNextSlide()
+   else if(this.distancia.moved > 150) this.activePrevSlide()
+   else this.changeSlide(this.slideArrayIndex.active)
+    
+  }
+
   addEvent(){
     this.wrapper.addEventListener('mousedown', this.onStart)
     this.wrapper.addEventListener('touchstart', this.onStart)
@@ -63,7 +80,6 @@ export default class Slide{
       const position = this.slidePosition(element)
       return{ element, position}
     })
-    console.log(this.slideArray)
   }
   changeSlide(slideArrayIndex){
     const activeSlide = this.slideArray[slideArrayIndex].position
@@ -74,16 +90,22 @@ export default class Slide{
   }
   slideIndexNav(slideArrayIndex){
     this.slideArrayIndex = {
-      prev: (slideArrayIndex - 1 > 0) ? slideArrayIndex - 1 : slideArrayIndex,
+      prev: (slideArrayIndex - 1 >= 0) ? slideArrayIndex - 1 : slideArrayIndex,
       active:  slideArrayIndex,
       next:(slideArrayIndex + 1 < this.slideArray.length) ? slideArrayIndex + 1 : slideArrayIndex ,
     }
+  }
+  activePrevSlide(){
+    this.changeSlide(this.slideArrayIndex.prev)
+  }
+  activeNextSlide(){
+    this.changeSlide(this.slideArrayIndex.next)
   }
   init(){
     this.bindEvents()
     this.addEvent()
     this.slideConfig()
-    this.changeSlide(5)
+   
     return this
   }
 }
