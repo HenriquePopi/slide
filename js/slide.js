@@ -1,3 +1,4 @@
+import debounce from "./debounce.js"
 export default class Slide{
   constructor(wrapper, slide){
     this.wrapper = document.querySelector(wrapper)
@@ -59,17 +60,8 @@ export default class Slide{
     
   }
 
-  addEvent(){
-    this.wrapper.addEventListener('mousedown', this.onStart)
-    this.wrapper.addEventListener('touchstart', this.onStart)
-    this.wrapper.addEventListener('mouseup', this.onEnd)
-    this.wrapper.addEventListener('touchend', this.onEnd)
-  }
-  bindEvents(){
-    this.onStart = this.onStart.bind(this)
-    this.onMove = this.onMove.bind(this)
-    this.onEnd = this.onEnd.bind(this)
-  }
+
+
   // configuração de slide
   slidePosition(slideItem){
     const margin = (this.wrapper.offsetWidth - slideItem.offsetWidth)/2
@@ -83,6 +75,7 @@ export default class Slide{
   }
   changeSlide(slideArrayIndex){
     const activeSlide = this.slideArray[slideArrayIndex].position
+    this.addActiveClass(slideArrayIndex)
     this.moveSlide(activeSlide)
     this.slideIndexNav(slideArrayIndex)
     this.slideIndexNav(slideArrayIndex)
@@ -101,11 +94,33 @@ export default class Slide{
   activeNextSlide(){
     this.changeSlide(this.slideArrayIndex.next)
   }
+  addActiveClass(slideArrayIndex){
+    this.slideArray.forEach(item => item.element.classList.remove("active"))
+    this.slideArray[slideArrayIndex].element.classList.add("active")
+  }
+  onResize(){
+    this.slideConfig()
+    this.changeSlide(this.slideArrayIndex.active)
+  }
+  addEvent(){
+    this.wrapper.addEventListener('mousedown', this.onStart)
+    this.wrapper.addEventListener('touchstart', this.onStart)
+    this.wrapper.addEventListener('mouseup', this.onEnd)
+    this.wrapper.addEventListener('touchend', this.onEnd)
+    window.addEventListener('resize',this.onResize)
+  }
+  bindEvents(){
+    this.onStart = this.onStart.bind(this)
+    this.onMove = this.onMove.bind(this)
+    this.onEnd = this.onEnd.bind(this)
+    this.onResize = debounce(this.onResize.bind(this),600)
+  }
   init(){
     this.bindEvents()
     this.addEvent()
     this.slideConfig()
-   
+    this.changeSlide(0)
+    this.onResize()
     return this
   }
 }
