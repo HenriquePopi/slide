@@ -1,5 +1,5 @@
 import debounce from "./debounce.js"
-export default class Slide{
+export  class Slide{
   constructor(wrapper, slide){
     this.wrapper = document.querySelector(wrapper)
     this.slide = document.querySelector(slide)
@@ -53,9 +53,8 @@ export default class Slide{
 
   
   changeSlideOnEnd(){
-    
-   if(this.distancia.moved <150) this.activeNextSlide()
-   else if(this.distancia.moved > 150) this.activePrevSlide()
+   if(this.distancia.moved < -120) this.activeNextSlide()
+   else if(this.distancia.moved > 120) this.activePrevSlide()
    else this.changeSlide(this.slideArrayIndex.active)
     
   }
@@ -75,11 +74,10 @@ export default class Slide{
   }
   changeSlide(slideArrayIndex){
     const activeSlide = this.slideArray[slideArrayIndex].position
-    this.addActiveClass(slideArrayIndex)
     this.moveSlide(activeSlide)
     this.slideIndexNav(slideArrayIndex)
-    this.slideIndexNav(slideArrayIndex)
     this.distancia.finalPositiom = activeSlide
+    this.addActiveClass(slideArrayIndex)
   }
   slideIndexNav(slideArrayIndex){
     this.slideArrayIndex = {
@@ -90,6 +88,7 @@ export default class Slide{
   }
   activePrevSlide(){
     this.changeSlide(this.slideArrayIndex.prev)
+    
   }
   activeNextSlide(){
     this.changeSlide(this.slideArrayIndex.next)
@@ -114,6 +113,9 @@ export default class Slide{
     this.onMove = this.onMove.bind(this)
     this.onEnd = this.onEnd.bind(this)
     this.onResize = debounce(this.onResize.bind(this),600)
+    this.activeNextSlide = this.activeNextSlide.bind(this)
+    this.activePrevSlide = this.activePrevSlide.bind(this)
+    
   }
   init(){
     this.bindEvents()
@@ -122,5 +124,20 @@ export default class Slide{
     this.changeSlide(0)
     this.onResize()
     return this
+  }
+}
+
+export class SlideNav extends Slide{
+  addArrow(prev,next){
+    this.prevElement = document.querySelector(prev)
+    this.nextElement = document.querySelector(next)
+    this.addArrowEvent()
+  }
+  addArrowEvent(){
+    this.prevElement.addEventListener('click',this.activePrevSlide)
+   // this.prevElement.addEventListener('ontouch',this.activePrevSlide )
+
+    //this.nextElement.addEventListener('ontouch',this.activeNextSlide )
+    this.nextElement.addEventListener('click',this.activeNextSlide)
   }
 }
