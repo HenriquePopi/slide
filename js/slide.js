@@ -3,13 +3,10 @@ export  class Slide{
   constructor(wrapper, slide){
     this.wrapper = document.querySelector(wrapper)
     this.slide = document.querySelector(slide)
-    this.distancia= {
-      finalPositiom: 0,
-      startX: 0,
-      actualPosition:0,
-      moved:0
-    }
+    this.distancia= {finalPositiom: 0, startX: 0,actualPosition:0,moved:0}
+    this.changeEvent = new Event('changeEvent')
   }
+
   transition(boolean){
     this.slide.style.transition = boolean ? 'transform .3s' : ''
   }
@@ -78,6 +75,7 @@ export  class Slide{
     this.slideIndexNav(slideArrayIndex)
     this.distancia.finalPositiom = activeSlide
     this.addActiveClass(slideArrayIndex)
+    this.wrapper.dispatchEvent(this.changeEvent)
   }
   slideIndexNav(slideArrayIndex){
     this.slideArrayIndex = {
@@ -121,13 +119,24 @@ export  class Slide{
     this.bindEvents()
     this.addEvent()
     this.slideConfig()
-    this.changeSlide(0)
+    this.changeSlide(3)
     this.onResize()
     return this
   }
 }
 
+
+
+
+
 export class SlideNav extends Slide{
+  constructor(wrapper, slide){
+    super(wrapper, slide)
+    this.bindControlMethods()
+  }
+  bindControlMethods(){
+    this.activeControlItem = this.activeControlItem.bind(this)
+  }
   addArrow(prev,next){
     this.prevElement = document.querySelector(prev)
     this.nextElement = document.querySelector(next)
@@ -135,9 +144,32 @@ export class SlideNav extends Slide{
   }
   addArrowEvent(){
     this.prevElement.addEventListener('click',this.activePrevSlide)
-   // this.prevElement.addEventListener('ontouch',this.activePrevSlide )
-
-    //this.nextElement.addEventListener('ontouch',this.activeNextSlide )
     this.nextElement.addEventListener('click',this.activeNextSlide)
+  }
+  createControl(){
+    const control =  document.createElement('ul')
+    control.dataset.control = 'navegacao'
+    this.slideArray.forEach((element, index) => {
+      control.innerHTML += `<li> <a href="#slide${index +1}">${index+1}</li>` 
+    });
+   this.wrapper.appendChild(control)
+   return control
+  }
+  eventControl(item, index){
+    item.addEventListener("click",(event)=> {
+      event.preventDefault()
+      this.changeSlide(index)
+    })
+    this.wrapper.addEventListener("changeEvent", this.activeControlItem)
+    
+  }
+  activeControlItem(){
+    this.controlArray.forEach(element =>element.classList.remove("active"));
+    this.controlArray[this.slideArrayIndex.active].classList.add("active")
+  }
+  addControl(customControl){
+    const control = document.querySelector(customControl) || this.createControl()
+    this.controlArray = [...control.children]
+    this.controlArray.forEach((element, index) => this.eventControl(element,index))
   }
 }

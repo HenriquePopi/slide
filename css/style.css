@@ -2,10 +2,13 @@ body {
   margin: 0px;
 }
 ul,
-li {
+li,
+a {
   padding: 0px;
   margin: 0px;
   list-style: none;
+  text-decoration: none;
+  color: none;
 }
 img {
   display: block;
@@ -36,4 +39,30 @@ img {
 .slide li.active {
   opacity: 1;
   transform: scale(1);
+}
+.attow-nav {
+  display: flex;
+  justify-content: center;
+}
+[data-control] {
+  display: flex;
+  margin: 0 auto;
+  justify-content: center;
+}
+[data-control] li {
+  margin: 8px 10px;
+  background-color: #fb5;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  overflow: hidden;
+  text-align: center;
+  text-indent: 15px;
+}
+[data-control] li a {
+  display: block;
+}
+[data-control] li:hover,
+[data-control] li.active {
+  background-color: #e54;
 }
